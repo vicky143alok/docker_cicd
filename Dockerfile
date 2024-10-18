@@ -20,7 +20,7 @@ RUN pip install --upgrade pip
 RUN pip install --user pandas boto3 snowflake-connector-python
 
 # Optionally copy your DAGs and other configuration files here
-# COPY ./dags /opt/airflow/dags
+COPY ./dags /opt/airflow/dags
 # COPY ./requirements.txt /requirements.txt
 
 # Optionally install additional dependencies from requirements.txt if needed
