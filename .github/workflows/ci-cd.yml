@@ -1,0 +1,35 @@
+name: CI/CD Pipeline for Airflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Step 2: Log in to Docker Hub
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_HUB_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+
+      # Step 3: Build the Docker image
+      - name: Build Docker image
+        run: docker build . -t ${{ secrets.DOCKER_HUB_USERNAME }}/airflow-dag:latest
+
+      # Step 4: Push the image to Docker Hub
+      - name: Push Docker image to Docker Hub
+        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/airflow-dag:latest
+
+      # Step 5: Deploy the Docker container to Airflow
+      - name: Deploy Airflow DAG
+        run: |
+          docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/airflow-dag:latest
+          docker stop airflow || true
+          docker rm airflow || true
+          docker run -d --name airflow -p 8080:8080 ${{ secrets.DOCKER_HUB_USERNAME }}/airflow-dag:latest
