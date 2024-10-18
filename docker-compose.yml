@@ -1,20 +1,33 @@
-version: '3.8'
+version: '3'
+
 services:
   postgres:
-    image: postgres:latest
+    image: postgres:13
     environment:
-      POSTGRES_USER: your_user
-      POSTGRES_PASSWORD: your_password
-      POSTGRES_DB: your_database
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U your_user"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
 
-volumes:
-  postgres_data:
+  redis:
+    image: redis:latest
+
+  webserver:
+    image: thelastmonk/airflow-dag:latest
+    command: ["airflow", "webserver"]
+    container_name: airflow_webserver
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - "8080:8080"
+    environment:
+      - _AIRFLOW_WWW_USER_USERNAME=admin
+      - _AIRFLOW_WWW_USER_PASSWORD=admin
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+
+  scheduler:
+    image: thelastmonk/airflow-dag:latest
+    container_name: airflow_scheduler
+    depends_on:
+      - webserver
