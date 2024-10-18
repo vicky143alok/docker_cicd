@@ -18,6 +18,7 @@ services:
     depends_on:
       - postgres
       - redis
+    restart: always
     ports:
       - "8080:8080"
     environment:
@@ -25,7 +26,9 @@ services:
       - _AIRFLOW_WWW_USER_PASSWORD=admin
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
-
+    volumes:
+      - ./dags:/home/development/airflow/docker_cicd_test/dags
+      
   scheduler:
     image: thelastmonk/airflow-dag:latest
     container_name: airflow_scheduler
