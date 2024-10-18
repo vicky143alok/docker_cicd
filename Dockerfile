@@ -9,11 +9,12 @@ RUN apt-get update && apt-get install -y \
     # Add any system packages you need here
     && apt-get clean
 
-# Upgrade pip
-RUN pip install --upgrade pip
 
 # Switch back to the airflow user for installing Python packages
 USER airflow
+
+# Upgrade pip
+RUN pip install --upgrade pip
 
 # Install the required Python packages
 RUN pip install --user pandas boto3 snowflake-connector-python
