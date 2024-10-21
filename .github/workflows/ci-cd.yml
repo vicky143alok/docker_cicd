@@ -33,6 +33,6 @@ jobs:
       - name: Deploy Airflow DAG
         run: |
           docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/airflow-dag:latest
-          docker stop airflow || true
-          docker rm airflow || true
+          docker stop airflow_webserver || true
+          docker rm airflow_webserver || true
           docker run -d --name airflow -p 8080:8080 ${{ secrets.DOCKER_HUB_USERNAME }}/airflow-dag:latest
