@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   postgres:
     image: postgres:latest
@@ -10,13 +12,21 @@ services:
   redis:
     image: redis:latest
 
-  webserver:
+
+  airflow_db_init:
     image: thelastmonk/airflow-dag:latest
-    command: ["airflow", "webserver", "--port", "8080"]
-    container_name: airflow_webserver
+    command: ["sh", "-c", "sleep 10 && airflow db init"]  # Wait for PostgreSQL
     depends_on:
       - postgres
-      - redis
+    restart: "no"
+
+
+  airflow_webserver:
+    image: thelastmonk/airflow-dag:latest
+    command: ["sh", "-c", "sleep 10 && airflow webserver --port 8080"]
+    container_name: airflow_webserver
+    depends_on:
+      - airflow_db_init
     restart: always
     ports:
       - "8080:8080"
@@ -27,25 +37,13 @@ services:
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
     volumes:
       - ./dags:/home/development/airflow/docker_cicd_test/dags
-      
-  scheduler:
+
+  airflow_scheduler:
     image: thelastmonk/airflow-dag:latest
     command: ["airflow", "scheduler"]
     container_name: airflow_scheduler
     depends_on:
-      - webserver
+      - airflow_db_init
     restart: always
 
-  airflow_db_init:
-    image: thelastmonk/airflow-dag:latest
-    command: ["airflow", "db", "init"]
-    depends_on:
-      - postgres  # Ensure it waits for PostgreSQL
-    restart: "no"
-
-  webserver_start:
-    image: thelastmonk/airflow-dag:latest
-    command: ["sh", "-c", "sleep 10 && airflow webserver"]  # Wait for DB init and then start webserver
-    depends_on:
-      - airflow_db_init
-    restart: "no"
+  
