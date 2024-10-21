@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   postgres:
     image: postgres:latest
@@ -14,7 +12,7 @@ services:
 
   webserver:
     image: thelastmonk/airflow-dag:latest
-    command: ["airflow", "webserver"]
+    command: ["airflow", "webserver", "--port", "8080"]
     container_name: airflow_webserver
     depends_on:
       - postgres
@@ -32,6 +30,22 @@ services:
       
   scheduler:
     image: thelastmonk/airflow-dag:latest
+    command: ["airflow", "scheduler"]
     container_name: airflow_scheduler
     depends_on:
       - webserver
+    restart: always
+
+  airflow_db_init:
+    image: thelastmonk/airflow-dag:latest
+    command: ["airflow", "db", "init"]
+    depends_on:
+      - postgres  # Ensure it waits for PostgreSQL
+    restart: "no"
+
+  webserver_start:
+    image: thelastmonk/airflow-dag:latest
+    command: ["sh", "-c", "sleep 10 && airflow webserver"]  # Wait for DB init and then start webserver
+    depends_on:
+      - airflow_db_init
+    restart: "no"
