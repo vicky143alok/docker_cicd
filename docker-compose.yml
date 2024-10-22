@@ -15,7 +15,7 @@ services:
 
   airflow_db_init:
     image: thelastmonk/airflow-dag:latest
-    command: ["sh", "-c", "sleep 10 && airflow db init"]  # Wait for PostgreSQL
+    command: ["airflow db init"]
     depends_on:
       - postgres
     restart: "no"
@@ -23,7 +23,7 @@ services:
 
   airflow_webserver:
     image: thelastmonk/airflow-dag:latest
-    command: ["sh", "-c", "sleep 10 && airflow webserver --port 8080"]
+    command: ["airflow" ,  "webserver",]
     container_name: airflow_webserver
     depends_on:
       - airflow_db_init
