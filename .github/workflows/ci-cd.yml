@@ -29,7 +29,7 @@ jobs:
 
       # Step 3: Build the Docker image
       - name: Build Docker image
-        run: docker build -f ./home/development/airflow/docker_cicd_test . -t ${{ secrets.DOCKER_HUB_USERNAME }}/airflow-dag:latest
+        run: docker build . -t ${{ secrets.DOCKER_HUB_USERNAME }}/airflow-dag:latest
 
       # Step 4: Push the image to Docker Hub
       - name: Push Docker image to Docker Hub
