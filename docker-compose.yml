@@ -1,13 +1,16 @@
 version: '3.8'
 
 services:
-  postgres:
-    image: postgres:latest
+  mysql:
+    image: mysql:latest
     restart: always
     environment:
-      POSTGRES_USER: airflow
-      POSTGRES_PASSWORD: airflow
-      POSTGRES_DB: airflow
+      MYSQL_ROOT_PASSWORD: your_root_password
+      MYSQL_DATABASE: airflow
+      MYSQL_USER: airflow_user
+      MYSQL_PASSWORD: your_password
+    ports:
+      - "3306:3306"
 
   redis:
     image: redis:latest
@@ -15,9 +18,9 @@ services:
 
   airflow_db_init:
     image: thelastmonk/airflow-dag:latest
-    command: ["airflow db init"]
+    command: ["airflow", "db", "init"]
     depends_on:
-      - postgres
+      - mysql
     restart: "no"
 
 
@@ -34,7 +37,7 @@ services:
       - _AIRFLOW_WWW_USER_USERNAME=admin
       - _AIRFLOW_WWW_USER_PASSWORD=admin
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
-      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=mysql+mysqldb://airflow_user:your_password@localhost:3306/airflow_db
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=mysql+mysqldb://airflow_user:your_password@mysql:3306/airflow_db
     volumes:
       - ./dags:/home/development/airflow/docker_cicd_test/dags
 
