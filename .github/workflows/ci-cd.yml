@@ -12,10 +12,16 @@ jobs:
     steps:
       # Step 1: Checkout the code
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
+
+      - name: Create and use a new Buildx builder
+        run: |
+            docker buildx create --name mybuilder --use
+            docker buildx inspect --bootstrap
+
 
       # Step 2: Log in to Docker Hub
       - name: Log in to Docker Hub
@@ -23,7 +29,7 @@ jobs:
 
       # Step 3: Build the Docker image
       - name: Build Docker image
-        run: docker build . -t ${{ secrets.DOCKER_HUB_USERNAME }}/airflow-dag:latest
+        run: docker build -f ./home/development/airflow/docker_cicd_test . -t ${{ secrets.DOCKER_HUB_USERNAME }}/airflow-dag:latest
 
       # Step 4: Push the image to Docker Hub
       - name: Push Docker image to Docker Hub
@@ -33,5 +39,10 @@ jobs:
       - name: Deploy Airflow DAG
         run: |
           docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/airflow-dag:latest
-          
+          docker stop airflow_webserver || true
+          docker rm airflow_webserver || true
           docker run -d --name airflow_webserver -p 8080:8080 ${{ secrets.DOCKER_HUB_USERNAME }}/airflow-dag:latest
+
+      # Step 6 CHeck if container running
+      - name: Check Airflow Webserver
+        run: docker ps | grep airflow_webserver
