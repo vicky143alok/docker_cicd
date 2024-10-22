@@ -29,7 +29,7 @@ services:
     command: ["airflow" ,  "webserver",]
     container_name: airflow_webserver
     depends_on:
-      - airflow_db_init
+      - mysql 
     restart: always
     ports:
       - "8080:8080"
@@ -46,7 +46,7 @@ services:
     command: ["airflow", "scheduler"]
     container_name: airflow_scheduler
     depends_on:
-      - airflow_db_init
+      - airflow_webserver
     restart: always
 
   
